@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  GameView.swift
 //  TicTacToe
 //
 //  Created by Ömer ALOĞLU on 29.04.2023.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct GameView: View {
     
     let columns: [GridItem] = [GridItem(.flexible()),
                                GridItem(.flexible()),
@@ -100,6 +100,23 @@ struct ContentView: View {
             }
         }
         
+        let humanMoves = moves.compactMap { $0 }.filter { $0.player == .human }
+        let humanPositions = Set(humanMoves.map { $0.boardIndex })
+        
+        for pattern in winPatterns {
+            let winPosition = pattern.subtracting(humanPositions)
+            
+            if winPosition.count == 1{
+                let isAvailable = !isSquareOccupied(in: moves, forIndex: winPosition.first!)
+                if isAvailable { return winPosition.first! }
+            }
+        }
+        
+        let centerSquare = 4
+        if !isSquareOccupied(in: moves, forIndex: centerSquare){
+            return centerSquare
+        }
+        
         
         
         
@@ -147,6 +164,6 @@ struct Move {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        GameView()
     }
 }
