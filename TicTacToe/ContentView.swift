@@ -38,18 +38,18 @@ struct ContentView: View {
                         .onTapGesture {
                             if isSquareOccupied(in: moves, forIndex: i) { return }
                             moves[i] = Move(player: .human, boardIndex: i)
-                            isGameboardDisabled = true
                             
                             if checkWinCodition(for: .human, in: moves){
-                                print("Human wins")
+                                alertItem = AlertContext.humanWin
                                 return
                             }
                             
                             if checkForDraw(in: moves){
-                                print("draw")
+                                alertItem = AlertContext.draw
                                 return
                             }
                             
+                            isGameboardDisabled = true                            
                             
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5){
                                 let computerPosition = determinComputerMovePosition(in: moves)
@@ -57,12 +57,12 @@ struct ContentView: View {
                                 isGameboardDisabled  = false
                                 
                                 if checkWinCodition(for: .computer, in: moves){
-                                    print("Computer wins")
+                                    alertItem = AlertContext.computerWin
                                     return
                                 }
                                 
                                 if checkForDraw(in: moves){
-                                    print("draw")
+                                    alertItem = AlertContext.draw
                                     return
                                 }
                             }
@@ -85,6 +85,25 @@ struct ContentView: View {
     }
     
     func determinComputerMovePosition(in moves: [Move?]) -> Int {
+        
+        let winPatterns: Set<Set<Int>> = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+        
+        let computerMoves = moves.compactMap { $0 }.filter { $0.player == .computer }
+        let computerPositions = Set(computerMoves.map { $0.boardIndex })
+        
+        for pattern in winPatterns {
+            let winPosition = pattern.subtracting(computerPositions)
+            
+            if winPosition.count == 1{
+                let isAvailable = !isSquareOccupied(in: moves, forIndex: winPosition.first!)
+                if isAvailable { return winPosition.first! }
+            }
+        }
+        
+        
+        
+        
+        
         var movePosition = Int.random(in: 0..<9)
         
         while isSquareOccupied(in: moves, forIndex: movePosition){
